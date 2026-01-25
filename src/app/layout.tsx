@@ -15,8 +15,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TextTube",
-  description: "Read your favorite videos",
+  title: {
+    default: "TextTube - YouTube動画をテキストで読む",
+    template: "%s | TextTube",
+  },
+  description: "YouTube動画の内容を構造化されたテキストで効率的に読める。LLMに読み込ませやすい形式で、動画視聴の時間を節約。",
+  keywords: ["YouTube", "要約", "テキスト化", "動画", "スクリプト", "LLM", "効率化"],
+  openGraph: {
+    type: "website",
+    locale: "ja_JP",
+    siteName: "TextTube",
+    title: "TextTube - YouTube動画をテキストで読む",
+    description: "YouTube動画の内容を構造化されたテキストで効率的に読める。",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TextTube - YouTube動画をテキストで読む",
+    description: "YouTube動画の内容を構造化されたテキストで効率的に読める。",
+  },
 };
 
 export default function RootLayout({
