@@ -1,10 +1,11 @@
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer';
 import { CopyButton } from '@/components/ui/CopyButton';
 import type { Metadata } from 'next';
+import { getThumbnailUrl } from '@/lib/youtube';
 
 interface WatchPageProps {
     params: Promise<{
@@ -17,6 +18,7 @@ export const revalidate = 0;
 // Generate dynamic metadata for SEO
 export async function generateMetadata({ params }: WatchPageProps): Promise<Metadata> {
     const { id } = await params;
+    const supabase = await createClient();
 
     const { data: video } = await supabase
         .from('videos')
@@ -38,20 +40,21 @@ export async function generateMetadata({ params }: WatchPageProps): Promise<Meta
         openGraph: {
             title: video.title,
             description,
-            images: video.thumbnail_url ? [video.thumbnail_url] : [],
+            images: video.thumbnail_url ? [getThumbnailUrl(video.thumbnail_url)] : [],
             type: 'article',
         },
         twitter: {
             card: 'summary_large_image',
             title: video.title,
             description,
-            images: video.thumbnail_url ? [video.thumbnail_url] : [],
+            images: video.thumbnail_url ? [getThumbnailUrl(video.thumbnail_url)] : [],
         },
     };
 }
 
 export default async function WatchPage({ params }: WatchPageProps) {
     const { id } = await params;
+    const supabase = await createClient();
 
     const { data: video, error } = await supabase
         .from('videos')
@@ -77,7 +80,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
                     {video.thumbnail_url && (
                         <div className="flex-shrink-0 w-40 h-24 relative rounded-lg overflow-hidden">
                             <Image
-                                src={video.thumbnail_url}
+                                src={getThumbnailUrl(video.thumbnail_url)}
                                 alt={video.title}
                                 fill
                                 className="object-cover"

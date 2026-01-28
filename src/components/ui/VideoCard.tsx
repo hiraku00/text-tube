@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Clock } from 'lucide-react';
+import { getThumbnailUrl } from '@/lib/youtube';
 
 interface VideoCardProps {
     id: string;
@@ -26,7 +27,7 @@ export function VideoCard({
             {/* Thumbnail Container */}
             <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-800">
                 <Image
-                    src={thumbnailUrl || '/placeholder.jpg'} // Fallback handling needed
+                    src={getThumbnailUrl(thumbnailUrl)}
                     alt={title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-200"

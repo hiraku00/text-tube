@@ -1,5 +1,5 @@
 import { VideoCard } from '@/components/ui/VideoCard';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
 
 // Mock data for initial UI verification
 const MOCK_VIDEOS = [
@@ -17,6 +17,7 @@ const MOCK_VIDEOS = [
 export const revalidate = 0; // Disable cache for demo purposes
 
 export default async function Home() {
+  const supabase = await createClient();
   const { data: videos, error } = await supabase
     .from('videos')
     .select('*')
