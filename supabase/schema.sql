@@ -20,9 +20,23 @@ for select
 to public
 using (true);
 
--- Create a policy that allows anyone to insert videos (for MVP)
-create policy "Allow public insert access"
+-- Create a policy that allows only authenticated users to insert videos
+create policy "Allow authenticated insert access"
 on public.videos
 for insert
-to public
+to authenticated
 with check (true);
+
+-- Create a policy that allows only authenticated users to update videos
+create policy "Allow authenticated update access"
+on public.videos
+for update
+to authenticated
+using (true);
+
+-- Create a policy that allows only authenticated users to delete videos
+create policy "Allow authenticated delete access"
+on public.videos
+for delete
+to authenticated
+using (true);
