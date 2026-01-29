@@ -1,26 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useActionState } from 'react';
 import { login } from '@/app/actions';
 
 export default function LoginPage() {
-    const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
-
-    async function handleSubmit(formData: FormData) {
-        setLoading(true);
-        setError(null);
-        try {
-            const result = await login(formData);
-            if (result?.error) {
-                setError(result.error);
-            }
-        } catch (e) {
-            setError('エラーが発生しました。');
-        } finally {
-            setLoading(false);
-        }
-    }
+    const [state, formAction, isPending] = useActionState(login, undefined);
 
     return (
         <div className="min-h-[80vh] flex items-center justify-center p-4">
@@ -30,7 +14,7 @@ export default function LoginPage() {
                     <p className="text-gray-400">オーナー専用の管理画面へアクセスします</p>
                 </div>
 
-                <form action={handleSubmit} className="space-y-6">
+                <form action={formAction} className="space-y-6">
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
                             メールアドレス
@@ -57,21 +41,21 @@ export default function LoginPage() {
                         />
                     </div>
 
-                    {error && (
+                    {state?.error && (
                         <div className="p-3 bg-red-900/30 border border-red-500/50 rounded-lg text-red-400 text-sm">
-                            {error === 'Invalid login credentials' ? 'ログイン情報が正しくありません。' : error}
+                            {state.error === 'Invalid login credentials' ? 'ログイン情報が正しくありません。' : state.error}
                         </div>
                     )}
 
                     <button
                         type="submit"
-                        disabled={loading}
-                        className={`w-full py-3 px-4 rounded-lg font-bold text-white transition-all ${loading
-                                ? 'bg-gray-600 cursor-not-allowed'
-                                : 'bg-tube-red hover:bg-red-600 shadow-lg shadow-red-900/20'
+                        disabled={isPending}
+                        className={`w-full py-3 px-4 rounded-lg font-bold text-white transition-all ${isPending
+                            ? 'bg-gray-600 cursor-not-allowed'
+                            : 'bg-tube-red hover:bg-red-600 shadow-lg shadow-red-900/20'
                             }`}
                     >
-                        {loading ? 'ログイン中...' : 'ログイン'}
+                        {isPending ? 'ログイン中...' : 'ログイン'}
                     </button>
                 </form>
             </div>

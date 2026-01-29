@@ -5,7 +5,11 @@ import { redirect } from 'next/navigation';
 import { getThumbnailUrl } from '@/lib/youtube';
 import { revalidatePath } from 'next/cache';
 
-export async function login(formData: FormData) {
+export interface ActionState {
+    error?: string;
+}
+
+export async function login(prevState: ActionState | undefined, formData: FormData) {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const supabase = await createClient();
