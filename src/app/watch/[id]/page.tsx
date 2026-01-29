@@ -112,7 +112,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
                 {/* Summary */}
                 <div className="bg-[#1e1e1e] rounded-xl p-6 mb-6 border border-gray-800">
                     <h2 className="text-lg font-bold mb-3 text-white">要約</h2>
-                    <p className="text-gray-300 leading-relaxed">{video.summary}</p>
+                    <MarkdownRenderer content={video.summary || ''} />
                 </div>
 
                 {/* Copy Button */}

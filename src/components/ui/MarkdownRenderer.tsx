@@ -34,24 +34,49 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                         </p>
                     ),
                     ul: ({ children }) => (
-                        <ul className="list-disc list-inside mb-4 space-y-2 text-gray-300">
+                        <ul className="list-disc list-outside mb-4 ml-6 space-y-2 text-gray-300">
                             {children}
                         </ul>
                     ),
                     ol: ({ children }) => (
-                        <ol className="list-decimal list-inside mb-4 space-y-2 text-gray-300">
+                        <ol className="list-decimal list-outside mb-4 ml-6 space-y-2 text-gray-300">
                             {children}
                         </ol>
                     ),
                     li: ({ children }) => (
-                        <li className="ml-4">
+                        <li className="pl-1">
                             {children}
                         </li>
                     ),
                     blockquote: ({ children }) => (
-                        <blockquote className="border-l-4 border-gray-600 pl-4 italic my-4 text-gray-400">
+                        <blockquote className="border-l-4 border-gray-700 pl-4 italic my-6 text-gray-300 bg-white/5 py-4 rounded-r-lg">
                             {children}
                         </blockquote>
+                    ),
+                    table: ({ children }) => (
+                        <div className="overflow-x-auto my-8">
+                            <table className="w-full border-collapse border border-gray-700 text-sm">
+                                {children}
+                            </table>
+                        </div>
+                    ),
+                    thead: ({ children }) => (
+                        <thead className="bg-gray-800 text-white">
+                            {children}
+                        </thead>
+                    ),
+                    th: ({ children }) => (
+                        <th className="border border-gray-700 px-4 py-2 text-left font-bold">
+                            {children}
+                        </th>
+                    ),
+                    td: ({ children }) => (
+                        <td className="border border-gray-700 px-4 py-2 text-gray-300">
+                            {children}
+                        </td>
+                    ),
+                    hr: () => (
+                        <hr className="my-10 border-gray-800" />
                     ),
                     code: ({ className, children }) => {
                         const isInline = !className;
@@ -63,7 +88,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                             );
                         }
                         return (
-                            <code className={`${className} block bg-gray-900 p-4 rounded-lg overflow-x-auto text-sm`}>
+                            <code className={`${className} block bg-gray-900 p-4 rounded-lg overflow-x-auto text-sm border border-gray-800`}>
                                 {children}
                             </code>
                         );
@@ -73,7 +98,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                             href={href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-400 hover:text-blue-300 underline"
+                            className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
                         >
                             {children}
                         </a>
