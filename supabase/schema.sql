@@ -7,6 +7,10 @@ create table public.videos (
   original_url text,
   summary text,
   detailed_script text,
+  published_at timestamptz,
+  view_count bigint,
+  channel_thumbnail_url text,
+  duration text,
   created_at timestamptz default now()
 );
 

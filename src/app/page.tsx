@@ -1,4 +1,4 @@
-import { VideoCard } from '@/components/ui/VideoCard';
+import { VideoList } from '@/components/ui/VideoList';
 import { createClient } from '@/lib/supabase/server';
 
 // Mock data for initial UI verification
@@ -39,21 +39,8 @@ export default async function Home() {
           動画がまだありません。<a href="/studio" className="text-blue-400 underline">スタジオ</a>から作成してください。
         </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8">
-        {displayVideos.map((video) => (
-          <VideoCard
-            key={video.id}
-            id={video.id}
-            title={video.title}
-            channelName={video.channel_name}
-            thumbnailUrl={video.thumbnail_url}
-            summary={video.summary || ''}
-            duration={video.duration || '10:00'} // Fallback duration if not in DB? Schema doesn't have duration?
-            // Wait, schema didn't have duration in my SQL command? 
-            // Let's check schema.sql. I missed duration column in SQL I wrote?
-            createdAt={video.created_at}
-          />
-        ))}
+      <div className="flex flex-col gap-6">
+        <VideoList videos={displayVideos} />
       </div>
     </div>
   );

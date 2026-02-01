@@ -41,6 +41,10 @@ export default async function EditVideoPage({ params }: { params: Promise<{ id: 
                     original_url: video.original_url || '',
                     summary: video.summary,
                     detailed_script: video.detailed_script,
+                    published_at: video.published_at,
+                    view_count: video.view_count,
+                    channel_thumbnail_url: video.channel_thumbnail_url,
+                    duration: video.duration,
                 }}
                 action={updateVideoWithId}
                 submitLabel="更新する"

@@ -56,6 +56,10 @@ export default async function WatchPage({ params }: WatchPageProps) {
     const { id } = await params;
     const supabase = await createClient();
 
+    // 閲覧数をインクリメント (非同期で実行)
+    const { incrementViewCount } = await import('@/app/actions');
+    incrementViewCount(id).catch(console.error);
+
     const { data: video, error } = await supabase
         .from('videos')
         .select('*')
@@ -67,45 +71,37 @@ export default async function WatchPage({ params }: WatchPageProps) {
         return notFound();
     }
 
-    // Calculate read time based on chars (approx 500 chars/min)
-    const charCount = (video.detailed_script || '').length;
-    const readTimeMin = Math.ceil(charCount / 500);
+    // 要約の文字数に基づいて読了時間を計算 (1分平均1000文字換算)
+    const summaryCharCount = (video.summary || '').length;
+    const readTimeMin = Math.max(1, Math.ceil(summaryCharCount / 1000));
 
     return (
-        <div className="flex flex-col lg:flex-row gap-6 p-4 md:p-6 max-w-[1600px] mx-auto">
+        <div className="flex flex-col lg:flex-row gap-6 p-4 md:p-6 max-w-[1600px] mx-auto overflow-visible">
             {/* Main Content: Text-First Layout */}
-            <div className="flex-1 lg:max-w-[70%]">
-                {/* Compact Header with Thumbnail */}
-                <div className="flex gap-4 mb-6">
-                    {video.thumbnail_url && (
-                        <div className="flex-shrink-0 w-40 h-24 relative rounded-lg overflow-hidden">
-                            <Image
-                                src={getThumbnailUrl(video.thumbnail_url)}
-                                alt={video.title}
-                                fill
-                                className="object-cover"
-                            />
-                        </div>
-                    )}
-                    <div className="flex-1">
-                        <h1 className="text-2xl font-bold mb-2">{video.title}</h1>
-                        <div className="flex items-center gap-3 text-sm text-gray-400">
-                            <span>{video.channel_name}</span>
-                            <span>•</span>
-                            <span>{new Date(video.created_at).toLocaleDateString()}</span>
-                            <span>•</span>
-                            <span className="text-tube-red font-medium">約{readTimeMin}分で読める</span>
-                        </div>
-                        {video.original_url && (
-                            <a
-                                href={video.original_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-block"
-                            >
-                                元の動画を見る →
-                            </a>
+            <div className="flex-1 lg:max-w-[70%] overflow-visible">
+                {/* Compact Header with Thumbnail - Sticky Below Global Nav (56px/14) */}
+                <div className="sticky top-14 z-20 bg-background py-4 mb-6 border-b border-gray-800 -mx-4 px-4 md:-mx-6 md:px-6">
+                    <div className="flex gap-4">
+                        {video.thumbnail_url && (
+                            <div className="flex-shrink-0 w-32 h-20 md:w-40 md:h-24 relative rounded-lg overflow-hidden border border-gray-800">
+                                <Image
+                                    src={getThumbnailUrl(video.thumbnail_url)}
+                                    alt={video.title}
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
                         )}
+                        <div className="flex-1 min-w-0">
+                            <h1 className="text-xl md:text-2xl font-bold mb-2 truncate" title={video.title}>{video.title}</h1>
+                            <div className="flex items-center gap-2 text-xs md:text-sm text-gray-400">
+                                <span className="truncate">{video.channel_name}</span>
+                                <span>•</span>
+                                <span>{new Date(video.created_at).toLocaleDateString()}</span>
+                                <span>•</span>
+                                <span className="text-tube-red font-medium whitespace-nowrap">要約読了：約{readTimeMin}分</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -115,18 +111,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
                     <MarkdownRenderer content={video.summary || ''} />
                 </div>
 
-                {/* Copy Button */}
-                <div className="flex justify-end mb-4">
-                    <CopyButton content={video.detailed_script || ''} />
-                </div>
 
-                {/* Detailed Script - Now with Markdown */}
-                <div className="bg-[#121212] rounded-xl p-6 md:p-10">
-                    <h3 className="text-xl font-bold text-white mb-6 border-l-4 border-tube-red pl-4">
-                        詳細スクリプト
-                    </h3>
-                    <MarkdownRenderer content={video.detailed_script || ''} />
-                </div>
             </div>
 
             {/* Right Column: Suggested Videos (Sidebar) */}
