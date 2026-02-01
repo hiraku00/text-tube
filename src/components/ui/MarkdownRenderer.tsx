@@ -13,21 +13,42 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
             <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                    h1: ({ children }) => (
-                        <h1 className="text-3xl font-bold mt-8 mb-4 text-white border-l-4 border-tube-red pl-4">
-                            {children}
-                        </h1>
-                    ),
-                    h2: ({ children }) => (
-                        <h2 className="text-2xl font-bold mt-6 mb-3 text-white border-l-4 border-tube-red pl-4">
-                            {children}
-                        </h2>
-                    ),
-                    h3: ({ children }) => (
-                        <h3 className="text-xl font-semibold mt-4 mb-2 text-gray-100">
-                            {children}
-                        </h3>
-                    ),
+                    h1: ({ children }) => {
+                        const id = String(children)
+                            .toLowerCase()
+                            .replace(/[、。？！：:;,.?!\[\]()]+/g, '')
+                            .replace(/\s+/g, '-')
+                            .replace(/^-+|-+$/g, '');
+                        return (
+                            <h1 id={id} className="text-3xl font-bold mt-8 mb-4 text-white border-l-4 border-tube-red pl-4 scroll-mt-52">
+                                {children}
+                            </h1>
+                        );
+                    },
+                    h2: ({ children }) => {
+                        const id = String(children)
+                            .toLowerCase()
+                            .replace(/[、。？！：:;,.?!\[\]()]+/g, '')
+                            .replace(/\s+/g, '-')
+                            .replace(/^-+|-+$/g, '');
+                        return (
+                            <h2 id={id} className="text-2xl font-bold mt-6 mb-3 text-white border-l-4 border-tube-red pl-4 scroll-mt-52">
+                                {children}
+                            </h2>
+                        );
+                    },
+                    h3: ({ children }) => {
+                        const id = String(children)
+                            .toLowerCase()
+                            .replace(/[、。？！：:;,.?!\[\]()]+/g, '')
+                            .replace(/\s+/g, '-')
+                            .replace(/^-+|-+$/g, '');
+                        return (
+                            <h3 id={id} className="text-xl font-semibold mt-4 mb-2 text-gray-100 scroll-mt-52">
+                                {children}
+                            </h3>
+                        );
+                    },
                     p: ({ children }) => (
                         <p className="mb-4 leading-relaxed text-gray-300">
                             {children}
@@ -93,16 +114,19 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                             </code>
                         );
                     },
-                    a: ({ href, children }) => (
-                        <a
-                            href={href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
-                        >
-                            {children}
-                        </a>
-                    ),
+                    a: ({ href, children }) => {
+                        const isInternal = href?.startsWith('#');
+                        return (
+                            <a
+                                href={href}
+                                target={isInternal ? undefined : "_blank"}
+                                rel={isInternal ? undefined : "noopener noreferrer"}
+                                className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+                            >
+                                {children}
+                            </a>
+                        );
+                    },
                 }}
             >
                 {content}

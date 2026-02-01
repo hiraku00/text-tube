@@ -41,6 +41,11 @@ export async function createVideo(formData: FormData) {
     const original_url = formData.get('original_url') as string;
     const summary = formData.get('summary') as string;
     const detailed_script = formData.get('detailed_script') as string;
+    const published_at = formData.get('published_at') as string;
+    const view_count_raw = formData.get('view_count') as string;
+    const view_count = view_count_raw ? Number(view_count_raw) : 0;
+    const channel_thumbnail_url = formData.get('channel_thumbnail_url') as string;
+    const duration = formData.get('duration') as string;
 
     const supabase = await createClient();
 
@@ -57,6 +62,10 @@ export async function createVideo(formData: FormData) {
         original_url,
         summary,
         detailed_script,
+        published_at: published_at || null,
+        view_count,
+        channel_thumbnail_url,
+        duration,
     });
 
     if (error) {
@@ -76,6 +85,11 @@ export async function updateVideo(id: string, formData: FormData) {
     const original_url = formData.get('original_url') as string;
     const summary = formData.get('summary') as string;
     const detailed_script = formData.get('detailed_script') as string;
+    const published_at = formData.get('published_at') as string;
+    const view_count_raw = formData.get('view_count') as string;
+    const view_count = view_count_raw ? Number(view_count_raw) : 0;
+    const channel_thumbnail_url = formData.get('channel_thumbnail_url') as string;
+    const duration = formData.get('duration') as string;
 
     const supabase = await createClient();
 
@@ -92,6 +106,10 @@ export async function updateVideo(id: string, formData: FormData) {
         original_url,
         summary,
         detailed_script,
+        published_at: published_at || null,
+        view_count,
+        channel_thumbnail_url,
+        duration,
     }).eq('id', id);
 
     if (error) {
@@ -128,3 +146,26 @@ export async function deleteVideo(id: string) {
 
     return { success: true };
 }
+
+export async function incrementViewCount(id: string) {
+    const supabase = await createClient();
+
+    // アトミックなインクリメントのためのRPCがない場合は、現在の値を取得して更新
+    const { data: video } = await supabase
+        .from('videos')
+        .select('view_count')
+        .eq('id', id)
+        .single();
+
+    if (video) {
+        const currentViews = video.view_count || 0;
+        // 既存の負の値があれば0からスタート、そうでなければ+1
+        const newViews = (currentViews < 0 ? 0 : currentViews) + 1;
+
+        await supabase
+            .from('videos')
+            .update({ view_count: newViews })
+            .eq('id', id);
+    }
+}
+

@@ -1,0 +1,26 @@
+feat(all): UI/UXの包括的改善、検索・メタデータ基盤の強化およびDB統合
+
+アプリケーション全体にわたる大規模な機能強化を実施しました。
+動画閲覧体験（Watch）、管理体験（Studio）、一覧表示（List）、およびデータ基盤（DB/Config）の4領域において、ユーザビリティ向上と技術的負債の解消を行っています。
+
+## Watch Page (閲覧体験の向上)
+- **feat:** スクロール追従型の固定ヘッダー（Sticky Header）を実装。記事閲覧中も常にタイトルとメタデータを維持。
+- **fix:** グローバルナビゲーションとの干渉を防ぐため、`sticky` オフセットを `top-14` (56px) に設定し、`overflow-visible` プロパティを親コンテナに適用することでレイアウト崩れを解消。
+- **fix:** 目次（TOC）のアンカーリンク不具合を修正。日本語の記号（、。等）をURLフラグメントから削除する正規表現ロジックを導入し、`scroll-margin-top` を調整してスムーズな遷移を実現。
+- **feat:** 閲覧数のインクリメント処理（`incrementViewCount`）を Server Actions として実装し、ページロード時に非同期で実行。
+
+## Studio (管理画面の効率化)
+- **ux:** 動画時間（Duration）入力を `HH:MM:SS` 分割フィールドに変更。数値検証ロジックを組み込み、フォーマットエラーを防止。
+- **feat:** チャンネル情報の自動入力ロジックを強化（`useEffect`）。既存データが存在する場合、最新の画像URLでフォームを自動補完（上書き）し、入力コストを削減。
+- **refactor:** フォームレイアウトを再設計。「高度な設定」セクションに自動取得項目を隠蔽し、主要入力項目への集中を促すUIへ変更。
+- **feat:** Server Actions (`createVideo`, `updateVideo`) を更新し、新規メタデータ（`view_count`, `published_at`, `duration`）の保存に対応。
+
+## Video List & Card (一覧表示の強化)
+- **feat:** 動画カード（`VideoCard.tsx`）のデザインを刷新。サムネイル上の再生時間表示、チャンネルアイコン、公開日、閲覧数の表示を追加。
+- **feat:** `next/image` の最適化を活用するため、`next.config.ts` に YouTube (`img.youtube.com`, `i.ytimg.com`) や Google User Content 等の外部ドメインを追加。
+- **util:** 閲覧数を「1.2万 閲覧」形式で整形するユーティリティ関数を実装。
+
+## Database & Infrastructure
+- **chore:** データベース構築フローを刷新。分散していたマイグレーションファイルを単一の `supabase/schema.sql` に統合し、宣言的なスキーマ管理へ移行（DX向上）。
+- **feat:** `videos` テーブルに `view_count`, `published_at`, `channel_thumbnail_url`, `duration` カラムを追加し、メタデータ格納要件に対応。
+- **docs:** `README.md` を更新し、最新のUI機能と単純化されたセットアップ手順を反映。

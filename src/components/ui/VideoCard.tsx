@@ -8,19 +8,42 @@ interface VideoCardProps {
     title: string;
     channelName: string;
     thumbnailUrl: string;
-    summary: string;
     duration?: string;
     createdAt: string;
+    publishedAt?: string;
+    viewCount?: number;
+    channelThumbnailUrl?: string;
 }
+
+const formatViews = (views?: number) => {
+    if (views === undefined || views === null) return '0 閲覧';
+    const v = Math.max(0, views);
+    if (v >= 10000) {
+        return `${(v / 10000).toFixed(1)}万 閲覧`;
+    }
+    return `${v.toLocaleString()} 閲覧`;
+};
+
+const formatDate = (dateStr: string) => {
+    try {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+    } catch {
+        return dateStr;
+    }
+};
 
 export function VideoCard({
     id,
     title,
     channelName,
     thumbnailUrl,
-    summary,
     duration = "10:00",
-    createdAt
+    createdAt,
+    publishedAt,
+    viewCount,
+    channelThumbnailUrl
 }: VideoCardProps) {
     return (
         <Link href={`/watch/${id}`} className="group flex flex-col gap-3 cursor-pointer">
@@ -39,22 +62,50 @@ export function VideoCard({
 
             {/* Info Container */}
             <div className="flex gap-3 items-start pr-6">
-                {/* Channel Icon (Mock) */}
-                <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gray-600" />
+                {/* Channel Icon */}
+                <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gray-600 overflow-hidden relative">
+                    {channelThumbnailUrl && !channelThumbnailUrl.includes('youtube.com/@') ? (
+                        <Image
+                            src={channelThumbnailUrl.startsWith('http') ? channelThumbnailUrl : '/placeholder.jpg'}
+                            alt={channelName}
+                            fill
+                            className="object-cover"
+                            sizes="36px"
+                            onError={(e) => {
+                                // エラー時はプレースホルダーに差し替えるなどの処理が可能だが、
+                                // Next.js Image の場合は state 管理が必要
+                            }}
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs text-gray-400 font-bold bg-gray-700">
+                            {channelName.charAt(0)}
+                        </div>
+                    )}
+                </div>
 
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1 overflow-hidden">
                     <h3 className="font-semibold text-white line-clamp-2 leading-tight group-hover:text-blue-400 transition-colors">
                         {title}
                     </h3>
-                    <div className="text-sm text-[#AAAAAA] flex flex-col">
-                        <span className="hover:text-white transition-colors">{channelName}</span>
-                        <div className="flex items-center">
-                            <span>{new Date(createdAt).toLocaleDateString()}</span>
+                    <div className="text-sm text-[#AAAAAA] flex flex-col gap-0.5 mt-1">
+                        <span className="hover:text-white transition-colors font-medium text-gray-300">
+                            {channelName}
+                        </span>
+                        <div className="flex flex-col text-xs gap-0.5">
+                            <div className="flex items-center gap-1">
+                                <span>閲覧回数：</span>
+                                <span className="text-white font-medium">{formatViews(viewCount)}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <span>記事作成日：</span>
+                                <span>{formatDate(createdAt)}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <span>動画公開日：</span>
+                                <span>{publishedAt ? formatDate(publishedAt) : '-'}</span>
+                            </div>
                         </div>
                     </div>
-                    <p className="text-xs text-[#AAAAAA] line-clamp-2 mt-1">
-                        {summary}
-                    </p>
                 </div>
             </div>
         </Link>
