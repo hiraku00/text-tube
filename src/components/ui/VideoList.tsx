@@ -40,46 +40,7 @@ export function VideoList({ videos }: VideoListProps) {
 
     return (
         <div className="flex flex-col gap-6">
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                {/* Search Bar */}
-                <div className="relative w-full md:max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
-                    <input
-                        type="text"
-                        placeholder="動画を検索..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-[#121212] border border-gray-800 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:border-gray-600 transition-colors"
-                    />
-                </div>
-
-                {/* Channel Filter Chips */}
-                <div className="flex gap-2 overflow-x-auto pb-2 w-full no-scrollbar">
-                    <button
-                        onClick={() => setSelectedChannel(null)}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${selectedChannel === null
-                            ? 'bg-white text-black'
-                            : 'bg-[#272727] text-white hover:bg-[#3f3f3f]'
-                            }`}
-                    >
-                        すべて
-                    </button>
-                    {channels.map(channel => (
-                        <button
-                            key={channel}
-                            onClick={() => setSelectedChannel(channel === selectedChannel ? null : channel)}
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${selectedChannel === channel
-                                ? 'bg-white text-black'
-                                : 'bg-[#272727] text-white hover:bg-[#3f3f3f]'
-                                }`}
-                        >
-                            {channel}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {filteredVideos.length === 0 ? (
+            {videos.length === 0 ? (
                 <div className="text-gray-500 mt-10 text-center py-20 bg-[#121212] rounded-xl border border-dashed border-gray-800">
                     該当する動画が見つかりませんでした。
                 </div>

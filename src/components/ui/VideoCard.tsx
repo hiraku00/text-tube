@@ -93,7 +93,7 @@ export function VideoCard({
                         </span>
                         <div className="flex flex-col text-xs gap-0.5">
                             <div className="flex items-center gap-1">
-                                <span>閲覧回数：</span>
+                                <span>閲覧数：</span>
                                 <span className="text-white font-medium">{formatViews(viewCount)}</span>
                             </div>
                             <div className="flex items-center gap-1">
