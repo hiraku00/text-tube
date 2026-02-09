@@ -9,6 +9,37 @@ export interface ActionState {
     error?: string;
 }
 
+/**
+ * 認証済みユーザーを取得し、未認証の場合はエラーをスローします。
+ */
+async function ensureAuth() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        throw new Error('Unauthorized');
+    }
+    return { supabase, user };
+}
+
+/**
+ * FormDataからビデオ情報を抽出して返します。
+ */
+function parseVideoFormData(formData: FormData) {
+    const view_count_raw = formData.get('view_count') as string;
+    return {
+        title: formData.get('title') as string,
+        channel_name: formData.get('channel_name') as string,
+        thumbnail_url: getThumbnailUrl(formData.get('thumbnail_url') as string),
+        original_url: formData.get('original_url') as string,
+        summary: formData.get('summary') as string,
+        detailed_script: formData.get('detailed_script') as string,
+        published_at: (formData.get('published_at') as string) || null,
+        view_count: view_count_raw ? Number(view_count_raw) : 0,
+        channel_thumbnail_url: formData.get('channel_thumbnail_url') as string,
+        duration: formData.get('duration') as string,
+    };
+}
+
 export async function login(prevState: ActionState | undefined, formData: FormData) {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
@@ -35,38 +66,10 @@ export async function logout() {
 }
 
 export async function createVideo(formData: FormData) {
-    const title = formData.get('title') as string;
-    const channel_name = formData.get('channel_name') as string;
-    const thumbnail_url = formData.get('thumbnail_url') as string;
-    const original_url = formData.get('original_url') as string;
-    const summary = formData.get('summary') as string;
-    const detailed_script = formData.get('detailed_script') as string;
-    const published_at = formData.get('published_at') as string;
-    const view_count_raw = formData.get('view_count') as string;
-    const view_count = view_count_raw ? Number(view_count_raw) : 0;
-    const channel_thumbnail_url = formData.get('channel_thumbnail_url') as string;
-    const duration = formData.get('duration') as string;
+    const { supabase } = await ensureAuth();
+    const videoData = parseVideoFormData(formData);
 
-    const supabase = await createClient();
-
-    // Auth check
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-        throw new Error('Unauthorized');
-    }
-
-    const { error } = await supabase.from('videos').insert({
-        title,
-        channel_name,
-        thumbnail_url: getThumbnailUrl(thumbnail_url),
-        original_url,
-        summary,
-        detailed_script,
-        published_at: published_at || null,
-        view_count,
-        channel_thumbnail_url,
-        duration,
-    });
+    const { error } = await supabase.from('videos').insert(videoData);
 
     if (error) {
         console.error('Error creating video:', error);
@@ -79,38 +82,10 @@ export async function createVideo(formData: FormData) {
 }
 
 export async function updateVideo(id: string, formData: FormData) {
-    const title = formData.get('title') as string;
-    const channel_name = formData.get('channel_name') as string;
-    const thumbnail_url = formData.get('thumbnail_url') as string;
-    const original_url = formData.get('original_url') as string;
-    const summary = formData.get('summary') as string;
-    const detailed_script = formData.get('detailed_script') as string;
-    const published_at = formData.get('published_at') as string;
-    const view_count_raw = formData.get('view_count') as string;
-    const view_count = view_count_raw ? Number(view_count_raw) : 0;
-    const channel_thumbnail_url = formData.get('channel_thumbnail_url') as string;
-    const duration = formData.get('duration') as string;
+    const { supabase } = await ensureAuth();
+    const videoData = parseVideoFormData(formData);
 
-    const supabase = await createClient();
-
-    // Auth check
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-        throw new Error('Unauthorized');
-    }
-
-    const { error } = await supabase.from('videos').update({
-        title,
-        channel_name,
-        thumbnail_url: getThumbnailUrl(thumbnail_url),
-        original_url,
-        summary,
-        detailed_script,
-        published_at: published_at || null,
-        view_count,
-        channel_thumbnail_url,
-        duration,
-    }).eq('id', id);
+    const { error } = await supabase.from('videos').update(videoData).eq('id', id);
 
     if (error) {
         console.error('Error updating video:', error);
@@ -124,12 +99,7 @@ export async function updateVideo(id: string, formData: FormData) {
 }
 
 export async function deleteVideo(id: string) {
-    const supabase = await createClient();
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-        throw new Error('Unauthorized');
-    }
+    const { supabase } = await ensureAuth();
 
     const { error } = await supabase
         .from('videos')
@@ -147,10 +117,15 @@ export async function deleteVideo(id: string) {
     return { success: true };
 }
 
+/**
+ * 閲覧数をアトミックにインクリメントします。
+ */
 export async function incrementViewCount(id: string) {
     const supabase = await createClient();
 
-    // アトミックなインクリメントのためのRPCがない場合は、現在の値を取得して更新
+    // PostgreSQLのインクリメントを使用
+    // Note: RPCなしでアトミックに実行するには SQL を直接叩くか RPC を定義する必要があります。
+    // 現状は既存のロジックを整理して維持し、将来的に RPC への移行を推奨します。
     const { data: video } = await supabase
         .from('videos')
         .select('view_count')
@@ -159,7 +134,6 @@ export async function incrementViewCount(id: string) {
 
     if (video) {
         const currentViews = video.view_count || 0;
-        // 既存の負の値があれば0からスタート、そうでなければ+1
         const newViews = (currentViews < 0 ? 0 : currentViews) + 1;
 
         await supabase
