@@ -1,7 +1,7 @@
 import { VideoList } from '@/components/ui/VideoList';
-import { createClient } from '@/lib/supabase/server';
 import SearchInput from '@/components/studio/SearchInput';
 import SortSelector from '@/components/studio/SortSelector';
+import { getVideos, SortOrder } from '@/lib/videos';
 
 export const revalidate = 0;
 
@@ -18,27 +18,9 @@ export default async function Home({
 }) {
   const params = await searchParams;
   const q = params.q || '';
-  const sort = params.sort || 'created_at-desc';
-  const [sortCol, sortDir] = sort.split('-');
+  const sort = (params.sort as SortOrder) || 'created_at-desc';
 
-  const supabase = await createClient();
-
-  let query = supabase
-    .from('videos')
-    .select('*')
-    .order(sortCol as any, { ascending: sortDir === 'asc' });
-
-  if (q) {
-    query = query.or(`title.ilike.%${q}%,channel_name.ilike.%${q}%`);
-  }
-
-  const { data: videos, error } = await query;
-
-  if (error) {
-    console.error('Error fetching videos:', error);
-  }
-
-  const displayVideos = videos || [];
+  const displayVideos = await getVideos({ q, sort });
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
