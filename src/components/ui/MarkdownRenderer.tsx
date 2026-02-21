@@ -16,7 +16,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                     h1: ({ children }) => {
                         const id = String(children)
                             .toLowerCase()
-                            .replace(/[、。？！：:;,.?!\[\]()]+/g, '')
+                            .replace(/[^\p{L}\p{N}\s-]/gu, '')
                             .replace(/\s+/g, '-')
                             .replace(/^-+|-+$/g, '');
                         return (
@@ -28,7 +28,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                     h2: ({ children }) => {
                         const id = String(children)
                             .toLowerCase()
-                            .replace(/[、。？！：:;,.?!\[\]()]+/g, '')
+                            .replace(/[^\p{L}\p{N}\s-]/gu, '')
                             .replace(/\s+/g, '-')
                             .replace(/^-+|-+$/g, '');
                         return (
@@ -40,7 +40,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                     h3: ({ children }) => {
                         const id = String(children)
                             .toLowerCase()
-                            .replace(/[、。？！：:;,.?!\[\]()]+/g, '')
+                            .replace(/[^\p{L}\p{N}\s-]/gu, '')
                             .replace(/\s+/g, '-')
                             .replace(/^-+|-+$/g, '');
                         return (
@@ -49,11 +49,33 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                             </h3>
                         );
                     },
-                    p: ({ children }) => (
-                        <p className="mb-4 leading-relaxed text-gray-300">
-                            {children}
-                        </p>
-                    ),
+                    a: ({ href, children, ...props }) => {
+                        let finalHref = href;
+                        const isInternal = href?.startsWith('#');
+
+                        // 内部アンカーリンクの場合、見出しのID生成ルール（小文字化・記号除去）に合わせて正規化
+                        if (isInternal) {
+                            const slug = href!.substring(1)
+                                .toLowerCase()
+                                .replace(/[^\p{L}\p{N}\s-]/gu, '')
+                                .replace(/\s+/g, '-')
+                                .replace(/^-+|-+$/g, '');
+                            finalHref = `#${slug}`;
+                        }
+
+                        return (
+                            <a
+                                href={finalHref}
+                                target={isInternal ? undefined : "_blank"}
+                                rel={isInternal ? undefined : "noopener noreferrer"}
+                                className="text-tube-red hover:underline transition-all"
+                                {...props}
+                            >
+                                {children}
+                            </a>
+                        );
+                    },
+                    p: ({ children }) => <p className="mb-4 text-gray-300 leading-relaxed">{children}</p>,
                     ul: ({ children }) => (
                         <ul className="list-disc list-outside mb-4 ml-6 space-y-2 text-gray-300">
                             {children}
@@ -112,19 +134,6 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                             <code className={`${className} block bg-gray-900 p-4 rounded-lg overflow-x-auto text-sm border border-gray-800`}>
                                 {children}
                             </code>
-                        );
-                    },
-                    a: ({ href, children }) => {
-                        const isInternal = href?.startsWith('#');
-                        return (
-                            <a
-                                href={href}
-                                target={isInternal ? undefined : "_blank"}
-                                rel={isInternal ? undefined : "noopener noreferrer"}
-                                className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
-                            >
-                                {children}
-                            </a>
                         );
                     },
                 }}
