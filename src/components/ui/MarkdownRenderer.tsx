@@ -49,18 +49,23 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                             </h3>
                         );
                     },
-                    a: ({ href, children, ...props }) => {
+                    a: ({ href, children }) => {
                         let finalHref = href;
                         const isInternal = href?.startsWith('#');
 
-                        // 内部アンカーリンクの場合、見出しのID生成ルール（小文字化・記号除去）に合わせて正規化
-                        if (isInternal) {
-                            const slug = href!.substring(1)
-                                .toLowerCase()
-                                .replace(/[^\p{L}\p{N}\s-]/gu, '')
-                                .replace(/\s+/g, '-')
-                                .replace(/^-+|-+$/g, '');
-                            finalHref = `#${slug}`;
+                        if (isInternal && href) {
+                            try {
+                                // URLエンコードされている場合を考慮してデコードしてから正規化
+                                const rawPath = decodeURIComponent(href.substring(1));
+                                const slug = rawPath
+                                    .toLowerCase()
+                                    .replace(/[^\p{L}\p{N}\s-]/gu, '')
+                                    .replace(/\s+/g, '-')
+                                    .replace(/^-+|-+$/g, '');
+                                finalHref = `#${slug}`;
+                            } catch (e) {
+                                console.error('Failed to decode href:', e);
+                            }
                         }
 
                         return (
@@ -68,8 +73,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                                 href={finalHref}
                                 target={isInternal ? undefined : "_blank"}
                                 rel={isInternal ? undefined : "noopener noreferrer"}
-                                className="text-tube-red hover:underline transition-all"
-                                {...props}
+                                className="text-blue-400 hover:text-blue-300 underline underline-offset-4 transition-all"
                             >
                                 {children}
                             </a>
