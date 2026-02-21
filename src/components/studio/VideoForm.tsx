@@ -116,14 +116,15 @@ export function VideoForm({ initialData, action, submitLabel }: VideoFormProps) 
                 </button>
             </div>
 
-            {activeTab === 'edit' ? (
+            <div className={activeTab === 'edit' ? 'block' : 'hidden'}>
                 <VideoFormFields
                     formData={formData}
                     setFormData={setFormData}
                     handleChange={handleChange}
                     handleDurationChange={handleDurationChange}
                 />
-            ) : (
+            </div>
+            {activeTab === 'preview' && (
                 <VideoPreview
                     summary={formData.summary}
                     detailed_script={formData.detailed_script}
