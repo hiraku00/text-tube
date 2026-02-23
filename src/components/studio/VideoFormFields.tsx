@@ -178,6 +178,10 @@ export function VideoFormFields({ formData, setFormData, handleChange, handleDur
 
             {/* Section: コンテンツ */}
             <FormSection title="コンテンツ詳細" iconColor="bg-green-500">
+                <div className="mb-6">
+                    <DurationFields formData={formData} handleDurationChange={handleDurationChange} />
+                </div>
+
                 <div className="flex flex-col gap-2">
                     <label className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center justify-between">
                         <span className="flex items-center gap-2">
@@ -219,8 +223,6 @@ export function VideoFormFields({ formData, setFormData, handleChange, handleDur
 
             {/* Section: メタデータ & 設定 */}
             <div className="flex flex-col gap-8">
-                <DurationFields formData={formData} handleDurationChange={handleDurationChange} />
-
                 <details className="group border border-gray-800/50 rounded-2xl bg-white/[0.01] overflow-hidden transition-all">
                     <summary className="list-none cursor-pointer p-6 text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center justify-between group-open:bg-white/[0.02]">
                         <span className="flex items-center gap-2">

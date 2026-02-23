@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Eye, Edit3 } from 'lucide-react';
+import { useFormStatus } from 'react-dom';
 import { createClient } from '@/lib/supabase/client';
 import { VideoFormFields } from './VideoFormFields';
 import { VideoPreview } from './VideoPreview';
@@ -21,6 +22,23 @@ interface VideoFormProps {
     };
     action: (formData: FormData) => Promise<void>;
     submitLabel: string;
+}
+
+function SubmitButton({ label }: { label: string }) {
+    const { pending } = useFormStatus();
+
+    return (
+        <button
+            type="submit"
+            disabled={pending}
+            className={`font-bold px-8 py-3 rounded-lg transition-all shadow-lg shadow-red-900/20 ${pending
+                ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                : 'bg-tube-red hover:bg-red-600 text-white'
+                }`}
+        >
+            {pending ? '保存中...' : label}
+        </button>
+    );
 }
 
 export function VideoForm({ initialData, action, submitLabel }: VideoFormProps) {
@@ -132,12 +150,7 @@ export function VideoForm({ initialData, action, submitLabel }: VideoFormProps) 
             )}
 
             <div className="flex justify-end pt-4">
-                <button
-                    type="submit"
-                    className="bg-tube-red hover:bg-red-600 text-white font-bold px-8 py-3 rounded-lg transition-all shadow-lg shadow-red-900/20"
-                >
-                    {submitLabel}
-                </button>
+                <SubmitButton label={submitLabel} />
             </div>
         </form >
     );
