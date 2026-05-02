@@ -10,46 +10,48 @@ interface DurationFieldsProps {
 
 export function DurationFields({ formData, handleDurationChange }: DurationFieldsProps) {
     return (
-        <div className="bg-white/[0.01] p-6 rounded-2xl border border-gray-800/30">
-            <label className="text-[11px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 mb-4 opacity-80">
-                <Clock size={14} className="text-green-500" />
+        <div className="flex flex-col gap-2">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 leading-none">
+                <Clock size={14} className="text-tube-red" />
                 動画の長さ
             </label>
-            <div className="flex items-center gap-2">
-                <div className="flex flex-col gap-1">
-                    <input
-                        name="duration_hh"
-                        value={formData.duration_hh}
-                        onChange={handleDurationChange}
-                        maxLength={2}
-                        className="bg-[#0A0A0A] border border-gray-800 rounded-lg py-2 w-12 text-white text-center focus:outline-none focus:border-green-500/50 transition-all font-mono placeholder-gray-800 text-sm"
-                        placeholder="00"
-                    />
-                    <span className="text-[9px] text-gray-600 font-black uppercase text-center tracking-tighter">Hr</span>
-                </div>
-                <span className="text-gray-700 font-bold mb-4">:</span>
-                <div className="flex flex-col gap-1">
-                    <input
-                        name="duration_mm"
-                        value={formData.duration_mm}
-                        onChange={handleDurationChange}
-                        maxLength={2}
-                        className="bg-[#0A0A0A] border border-gray-800 rounded-lg py-2 w-12 text-white text-center focus:outline-none focus:border-green-500/50 transition-all font-mono placeholder-gray-800 text-sm"
-                        placeholder="00"
-                    />
-                    <span className="text-[9px] text-gray-600 font-black uppercase text-center tracking-tighter">Min</span>
-                </div>
-                <span className="text-gray-700 font-bold mb-4">:</span>
-                <div className="flex flex-col gap-1">
-                    <input
-                        name="duration_ss"
-                        value={formData.duration_ss}
-                        onChange={handleDurationChange}
-                        maxLength={2}
-                        className="bg-[#0A0A0A] border border-gray-800 rounded-lg py-2 w-12 text-white text-center focus:outline-none focus:border-green-500/50 transition-all font-mono placeholder-gray-800 text-sm"
-                        placeholder="00"
-                    />
-                    <span className="text-[9px] text-gray-600 font-black uppercase text-center tracking-tighter">Sec</span>
+            <div className="flex items-center gap-3 bg-[#0A0A0A] border border-gray-800 rounded-xl p-[11px] px-4 shadow-lg h-[54px]">
+                <div className="flex items-center gap-2">
+                    <div className="flex flex-col items-center">
+                        <input
+                            name="duration_hh"
+                            value={formData.duration_hh}
+                            onChange={handleDurationChange}
+                            maxLength={2}
+                            className="bg-transparent border-none w-6 text-white text-center focus:outline-none transition-all font-mono placeholder-gray-800 text-sm"
+                            placeholder="00"
+                        />
+                        <span className="text-[7px] text-gray-600 font-black uppercase tracking-tighter leading-none">Hr</span>
+                    </div>
+                    <span className="text-gray-700 font-bold text-xs">:</span>
+                    <div className="flex flex-col items-center">
+                        <input
+                            name="duration_mm"
+                            value={formData.duration_mm}
+                            onChange={handleDurationChange}
+                            maxLength={2}
+                            className="bg-transparent border-none w-6 text-white text-center focus:outline-none transition-all font-mono placeholder-gray-800 text-sm"
+                            placeholder="00"
+                        />
+                        <span className="text-[7px] text-gray-600 font-black uppercase tracking-tighter leading-none">Min</span>
+                    </div>
+                    <span className="text-gray-700 font-bold text-xs">:</span>
+                    <div className="flex flex-col items-center">
+                        <input
+                            name="duration_ss"
+                            value={formData.duration_ss}
+                            onChange={handleDurationChange}
+                            maxLength={2}
+                            className="bg-transparent border-none w-6 text-white text-center focus:outline-none transition-all font-mono placeholder-gray-800 text-sm"
+                            placeholder="00"
+                        />
+                        <span className="text-[7px] text-gray-600 font-black uppercase tracking-tighter leading-none">Sec</span>
+                    </div>
                 </div>
             </div>
             <input
@@ -129,6 +131,24 @@ export function VideoFormFields({ formData, setFormData, handleChange, handleDur
                         placeholder="https://www.youtube.com/watch?v=..."
                     />
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+                    <div className="flex flex-col gap-2">
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 leading-none">
+                            <Clock size={14} className="text-tube-red" />
+                            動画公開日
+                        </label>
+                        <input
+                            type="date"
+                            name="published_at"
+                            value={formData.published_at}
+                            onChange={handleChange}
+                            max="9999-12-31"
+                            className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 text-white focus:outline-none focus:border-tube-red focus:ring-1 focus:ring-tube-red transition-all shadow-lg font-mono text-sm h-[54px]"
+                        />
+                    </div>
+                    <DurationFields formData={formData} handleDurationChange={handleDurationChange} />
+                </div>
             </FormSection>
 
             {/* Section: チャンネル情報 */}
@@ -178,10 +198,6 @@ export function VideoFormFields({ formData, setFormData, handleChange, handleDur
 
             {/* Section: コンテンツ */}
             <FormSection title="コンテンツ詳細" iconColor="bg-green-500">
-                <div className="mb-6">
-                    <DurationFields formData={formData} handleDurationChange={handleDurationChange} />
-                </div>
-
                 <div className="flex flex-col gap-2">
                     <label className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center justify-between">
                         <span className="flex items-center gap-2">
@@ -243,29 +259,16 @@ export function VideoFormFields({ formData, setFormData, handleChange, handleDur
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="flex flex-col gap-2">
-                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">動画公開日</label>
-                                <input
-                                    type="date"
-                                    name="published_at"
-                                    value={formData.published_at}
-                                    onChange={handleChange}
-                                    max="9999-12-31"
-                                    className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-3 text-white focus:outline-none focus:border-tube-red text-sm font-mono"
-                                />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">閲覧数設定</label>
-                                <input
-                                    type="number"
-                                    name="view_count"
-                                    value={formData.view_count}
-                                    onChange={handleChange}
-                                    className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-3 text-white focus:outline-none focus:border-tube-red text-sm font-mono"
-                                    placeholder="0"
-                                />
-                            </div>
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">閲覧数設定</label>
+                            <input
+                                type="number"
+                                name="view_count"
+                                value={formData.view_count}
+                                onChange={handleChange}
+                                className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-3 text-white focus:outline-none focus:border-tube-red text-sm font-mono w-full md:w-1/2"
+                                placeholder="0"
+                            />
                         </div>
                     </div>
                 </details>
