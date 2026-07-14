@@ -37,6 +37,108 @@ YouTube の長尺動画の内容を効率的に把握するための、要約・
 - **Preview デプロイ**: プルリクエスト（PR）ごとに、本番反映前の動作確認ができる独立したプレビューURLが自動生成されます。
 - **ビルド時検証**: TypeScript の型チェックがビルドプロセスに含まれており、安全性が担保された状態でのみリリースが行われます。
 
+### Supabase Free プランの自動停止回避
+
+Supabase の Free プランでは、一定期間データベースへの利用が少ないプロジェクトが自動的に一時停止されることがあります。このプロジェクトでは、それを避けるために GitHub Actions から Supabase REST API へ定期的に軽い読み取りリクエストを送っています。
+
+対象のワークフローは以下です。
+
+```text
+.github/workflows/keep-supabase-active.yml
+```
+
+#### 何をしているか
+
+このワークフローは毎日 1 回、GitHub Actions 上で `curl` を実行し、Supabase の `videos` テーブルから `id` を最大 1 件だけ読み取ります。
+
+```http
+GET /rest/v1/videos?select=id&limit=1
+```
+
+これは読み取り専用のリクエストです。データの作成・更新・削除は行いません。`videos` テーブルにデータが 0 件でも、Supabase と RLS 設定が正常であれば空配列が返り、ワークフローは成功します。
+
+実行スケジュールは GitHub Actions の cron で管理しています。
+
+```yaml
+schedule:
+  - cron: "0 0 * * *"
+```
+
+GitHub Actions の cron は UTC 基準なので、`0 0 * * *` は日本時間の毎日 09:00 に相当します。
+
+#### なぜやっているか
+
+Supabase から「過去 7 日間のアクティビティが不足しているため、プロジェクトが一時停止対象になる可能性がある」という通知が来たためです。アプリを毎日手動で開く代わりに、GitHub Actions で最低限のデータベースアクセスを自動化しています。
+
+ただし、Supabase は「sufficient activity」の厳密な判定条件を公開していません。そのため、この設定は実用上の自動停止回避策ですが、将来の Supabase 側の仕様変更まで保証するものではありません。
+
+#### 使っている GitHub Secrets
+
+ワークフローでは以下の GitHub Actions Secrets を参照します。
+
+```text
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+```
+
+Next.js アプリ本体でも同じ名前の環境変数を使っているため、GitHub Actions 側も同じ名前に揃えています。`NEXT_PUBLIC_` という接頭辞は Next.js のブラウザ公開用環境変数を意味しますが、GitHub Actions では単なる環境変数名として扱われます。
+
+`service_role` キーや `NEXT_SUPABASE_SECRET_KEY` は使いません。このワークフローは公開用の publishable key で実行できる読み取り処理だけを行うため、強い権限のキーを GitHub Actions に渡さない方が安全です。
+
+#### どう設定したか
+
+ローカルの `.env.local` に設定されていた以下の値を使って、GitHub CLI で repository secret として登録しました。
+
+```text
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+```
+
+登録に使った操作は概ね以下です。
+
+```bash
+awk '/^NEXT_PUBLIC_SUPABASE_(URL|PUBLISHABLE_KEY)=/' .env.local \
+  | gh secret set -f - --repo hiraku00/text-tube
+```
+
+登録後、以下のように secret 名が存在することを確認しました。
+
+```bash
+gh secret list --repo hiraku00/text-tube
+```
+
+期待される表示名は以下です。値そのものは GitHub 上でも表示されません。
+
+```text
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+NEXT_PUBLIC_SUPABASE_URL
+```
+
+#### 動作確認方法
+
+手動で実行する場合は GitHub の Actions 画面から `Keep Supabase Active` を選び、`Run workflow` を押します。
+
+GitHub CLI から実行する場合は以下です。
+
+```bash
+gh workflow run keep-supabase-active.yml --repo hiraku00/text-tube --ref main
+```
+
+実行結果の確認は以下です。
+
+```bash
+gh run list --workflow keep-supabase-active.yml --repo hiraku00/text-tube
+```
+
+正常な場合、ログには以下のような内容が表示されます。
+
+```text
+Supabase returned HTTP 200
+Supabase project responded successfully.
+```
+
+失敗した場合は、まず GitHub Secrets の名前がワークフロー内の参照名と一致しているか、Supabase の publishable key が有効か、`videos` テーブルの読み取りが publishable key で許可されているかを確認してください。
+
 ## コンテンツ作成ガイド (TOC 生成規則)
 
 本サイトの Markdown レンダラーは、見出し（`#`, `##`, `###`）からアンカーリンク用の ID を自動生成します。また、本文内の内部リンク（`#` で始まるリンク）も自動的に同じ規則で正規化されるため、LLM サービスで複雑な変換ルールを意識する必要はありません。
