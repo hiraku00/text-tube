@@ -2,6 +2,7 @@
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { MermaidDiagram } from './MermaidDiagram';
 
 interface MarkdownRendererProps {
     content: string;
@@ -127,6 +128,13 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                     ),
                     code: ({ className, children }) => {
                         const isInline = !className;
+                        const language = className?.match(/language-(\w+)/)?.[1];
+                        const code = String(children).replace(/\n$/, '');
+
+                        if (!isInline && language === 'mermaid') {
+                            return <MermaidDiagram chart={code} />;
+                        }
+
                         if (isInline) {
                             return (
                                 <code className="bg-gray-800 px-1.5 py-0.5 rounded text-sm text-blue-300">
